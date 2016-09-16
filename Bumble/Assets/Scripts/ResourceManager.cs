@@ -15,10 +15,12 @@ public class ResourceManager : MonoBehaviour {
     //bees
     int foragers;
     int builders;
+    int guards;
 
     //modifiers
     float forageSpeed;
-    float buildHunger;
+    int buildHunger;
+    int guardHunger;
 
     float lastUpdate;
 
@@ -26,6 +28,7 @@ public class ResourceManager : MonoBehaviour {
     public Text waxLabel;
     public Text foragerLabel;
     public Text builderLabel;
+    public Text guardLabel;
 
     //update test
     float nextActionTime = 0.0f;
@@ -40,6 +43,7 @@ public class ResourceManager : MonoBehaviour {
         builders = 0;
         forageSpeed = 2;
         buildHunger = 1;
+        guardHunger = 1;
         maxFood = 500;
         maxWax = 500;
         lastUpdate = Time.time;
@@ -54,7 +58,8 @@ public class ResourceManager : MonoBehaviour {
             nextActionTime += period;
 
             //Food drain
-            food -= builders * buildHunger;
+            int drain = (builders * buildHunger) + (guards * guardHunger);
+            food -= drain;
 
             //wax production
             if (wax < maxWax && food > 200)
@@ -74,6 +79,7 @@ public class ResourceManager : MonoBehaviour {
         foodLabel.text = "Food: " + (int)food + "/" + maxFood;
         foragerLabel.text = "Foragers: " + foragers;
         builderLabel.text = "Builders:  " + builders;
+        guardLabel.text = "Guards: " + guards;
         waxLabel.text = "Wax:  " + (int)wax + "/" + maxWax;
     }
 
@@ -102,6 +108,11 @@ public class ResourceManager : MonoBehaviour {
     public void newBuilder()
     {
         builders += nestSize;
+    }
+
+    public void newGuard()
+    {
+        guards += nestSize;
     }
 
     public void timeDilation(int multiplier)

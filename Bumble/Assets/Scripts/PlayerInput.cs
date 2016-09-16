@@ -113,6 +113,14 @@ public class PlayerInput : MonoBehaviour {
                         gameObject.GetComponent<ResourceManager>().newBuilder();
                     }
                     break;
+                case 3:
+                    if (gameObject.GetComponent<ResourceManager>().getFood() < 400) type = -1;
+                    else
+                    {
+                        gameObject.GetComponent<ResourceManager>().setFood(-400);
+                        gameObject.GetComponent<ResourceManager>().newGuard();
+                    }
+                    break;
             }
 
             currentCell.GetComponent<CellManager>().setCellType(type);
