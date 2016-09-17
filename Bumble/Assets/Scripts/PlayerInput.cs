@@ -12,9 +12,12 @@ public class PlayerInput : MonoBehaviour {
 
     GameObject currentCell;
     public GameObject cellHighlight;
-    public GameObject cellMenu;
+    public GameObject[] cellMenus;
+    public GameObject queenMenu;
 
     public GameObject emptyMenu;
+
+    public int numTypes;
 
     // Use this for initialization
     void Start ()
@@ -31,34 +34,67 @@ public class PlayerInput : MonoBehaviour {
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f))
             {
-                if(hit.transform.tag != "Empty") emptyMenu.SetActive(false); //if not empty clicked on, wipe highlight.
+                if (hit.transform.tag != "Empty") emptyMenu.SetActive(false); //if not empty clicked on, wipe highlight.
+
+                if (hit.transform.tag == "Queen")
+                {
+                    currentCell = hit.transform.parent.gameObject;
+                    Vector3 temp = currentCell.transform.position; temp.z -= 0.01f;
+                    cellHighlight.transform.position = temp;
+                    queenMenu.SetActive(true);
+                    cellHighlight.SetActive(true);
+                }
+                else
+                {
+                    queenMenu.SetActive(false);
+                    cellHighlight.SetActive(false);
+
+                }
 
                 if (hit.transform.tag == "Cell")
                 {
                     currentCell = hit.transform.parent.gameObject;
+
                     cellHighlight.SetActive(true);
 
                     Vector3 temp = currentCell.transform.position; temp.z -= 0.01f;
                     cellHighlight.transform.position = temp;
-                    cellMenu.SetActive(true);
+
+                    for (int i = 0; i <= currentCell.GetComponent<CellManager>().numTypes(); i++)
+                    {
+                        if (i - 1 == currentCell.GetComponent<CellManager>().getCellType()) cellMenus[i].SetActive(true);
+                        else cellMenus[i].SetActive(false);
+                    }
                 }
                 else
                 {
-                    cellMenu.SetActive(false);
+                    currentCell = hit.transform.parent.gameObject;
+                    for (int i = 0; i < currentCell.GetComponent<CellManager>().numTypes(); i++)
+                    {
+                        cellMenus[i].SetActive(false);
+                    }
                     cellHighlight.SetActive(false);
 
                     if (hit.transform.tag == "Empty")
                     {
-                        currentCell = hit.transform.parent.gameObject;
-                            cellHighlight.SetActive(true);
+                        cellHighlight.SetActive(true);
 
-                            Vector3 temp = currentCell.transform.position; temp.z -= 0.01f;
-                            cellHighlight.transform.position = temp;
-                            emptyMenu.SetActive(true);
+                        Vector3 temp = currentCell.transform.position; temp.z -= 0.01f;
+                        cellHighlight.transform.position = temp;
+                        emptyMenu.SetActive(true);
                     }
                 }
 
             }
+            else
+            {
+                for (int i = 0; i <= numTypes; i++)
+                {
+                    cellMenus[i].SetActive(false);
+                    cellHighlight.SetActive(false);
+                }
+            }
+
         }
         if (Input.GetMouseButtonDown(2))
         {
@@ -123,6 +159,12 @@ public class PlayerInput : MonoBehaviour {
                     break;
             }
 
+            for (int i = 0; i <= currentCell.GetComponent<CellManager>().numTypes(); i++)
+            {
+                if (i == currentCell.GetComponent<CellManager>().getCellType()) cellMenus[i].SetActive(true);
+                else cellMenus[i].SetActive(false);
+            }
+
             currentCell.GetComponent<CellManager>().setCellType(type);
         }
     }
@@ -136,7 +178,7 @@ public class PlayerInput : MonoBehaviour {
             Destroy(currentCell);
             currentCell = (GameObject)Instantiate(cell, newPos, Quaternion.identity);
             emptyMenu.SetActive(false);
-            cellMenu.SetActive(true);
+            cellMenus[0].SetActive(true);
         }
     }
 

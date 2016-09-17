@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CellManager : MonoBehaviour {
+public class QueenManager : MonoBehaviour {
 
     GameObject uLeft;   //-0.5,0.75
     GameObject uRight;  //0.5,0.75
@@ -20,20 +20,16 @@ public class CellManager : MonoBehaviour {
     int cellType;
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
         adjCheck(true);
         cellType = -1;
     }
 
     // Update is called once per frame
-    void Update ()
+    void Update()
     {
-        for(int i = 0; i < cellTypes.Length; i++)
-        {
-            if (i == cellType) cellTypes[i].SetActive(true);
-            else cellTypes[i].SetActive(false);
-        }
+
     }
 
     public void adjCheck(bool reCheck)
@@ -62,9 +58,9 @@ public class CellManager : MonoBehaviour {
 
         RaycastHit hit;
         float maxRay = dir.z; dir.z = -1;
-        if (Physics.Raycast(gameObject.transform.position + dir, new Vector3(0,0,1), out hit, 10.0f))
+        if (Physics.Raycast(gameObject.transform.position + dir, new Vector3(0, 0, 1), out hit, 10.0f))
         {
-            if (hit.transform.tag == "Cell" | hit.transform.tag == "Queen")
+            if (hit.transform.tag == "Cell")
             {
                 GameObject adj = hit.transform.parent.gameObject;
                 if (reCheck) adj.GetComponent<CellManager>().adjCheck(false);
@@ -82,14 +78,4 @@ public class CellManager : MonoBehaviour {
             return emptyCell;
         }
     }
-
-    public void setCellType(int i)
-    {
-        cellType = i;
-    }
-    public int getCellType()
-    { return cellType; }
-
-    public int numTypes()
-    { return cellTypes.Length; }
 }
