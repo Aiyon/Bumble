@@ -35,7 +35,7 @@ public class PlayerInput : MonoBehaviour {
 
                 if (hit.transform.tag == "Cell")
                 {
-                    currentCell = hit.transform.gameObject;
+                    currentCell = hit.transform.parent.gameObject;
                     cellHighlight.SetActive(true);
 
                     Vector3 temp = currentCell.transform.position; temp.z -= 0.01f;
@@ -49,7 +49,7 @@ public class PlayerInput : MonoBehaviour {
 
                     if (hit.transform.tag == "Empty")
                     {
-                        currentCell = hit.transform.gameObject;
+                        currentCell = hit.transform.parent.gameObject;
                             cellHighlight.SetActive(true);
 
                             Vector3 temp = currentCell.transform.position; temp.z -= 0.01f;
@@ -118,7 +118,7 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         gameObject.GetComponent<ResourceManager>().setFood(-400);
-                        gameObject.GetComponent<ResourceManager>().newGuard();
+                        gameObject.GetComponent<ResourceManager>().newGuard(currentCell);
                     }
                     break;
             }

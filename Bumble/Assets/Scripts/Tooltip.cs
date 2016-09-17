@@ -26,12 +26,8 @@ public class Tooltip : MonoBehaviour {
             float offset = sizeDelta.y;
             Vector3 newPos = Input.mousePosition + new Vector3(0, offset + 30, 0);
 
-            Debug.Log(sizeDelta.x);
-            Debug.Log(Input.mousePosition.x);
-
             if (Input.mousePosition.x < sizeDelta.x * 1.225f)
             {
-                Debug.Log("BLARG");
                 newPos.x = sizeDelta.x * 1.225f;
             }
             TooltipBox.transform.position = newPos;

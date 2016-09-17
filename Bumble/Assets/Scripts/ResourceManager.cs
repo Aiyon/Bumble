@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class ResourceManager : MonoBehaviour {
@@ -10,17 +11,22 @@ public class ResourceManager : MonoBehaviour {
     float wax;
     int maxWax;
     public int storageSize;
-    public int nestSize;
+    int fNestSize;
+    int bNestSize;
+    int gNestSize;
+
+    int sCounter;
 
     //bees
     int foragers;
     int builders;
+    int maxGuards;
     int guards;
 
     //modifiers
     float forageSpeed;
     int buildHunger;
-    int guardHunger;
+    float guardHunger;
 
     float lastUpdate;
 
@@ -30,6 +36,9 @@ public class ResourceManager : MonoBehaviour {
     public Text builderLabel;
     public Text guardLabel;
 
+    public List<GameObject> guardList;
+    public GameObject guard;
+
     //update test
     float nextActionTime = 0.0f;
     float period = 1.0f;
@@ -37,16 +46,22 @@ public class ResourceManager : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
+        fNestSize = 1;
+        bNestSize = 1;
+        gNestSize = 2;
+
         food = 500;
         wax = 0;
         foragers = 0;
         builders = 0;
         forageSpeed = 2;
         buildHunger = 1;
-        guardHunger = 1;
+        guardHunger = 0.5f;
         maxFood = 500;
         maxWax = 500;
         lastUpdate = Time.time;
+
+        sCounter = 0;   //how many seconds has the game been going for.
     }
 	
 	// Update is called once per frame
@@ -55,10 +70,30 @@ public class ResourceManager : MonoBehaviour {
         //Update every x seconds.
         if (Time.time > nextActionTime)
         {
+
+            if (sCounter == 600) sCounter = 0;   //reset sCounter every 10 minutes so the value doesn't get too high and risk overflow.
+            //sCounter code.
+            if (sCounter % 3 == 0 && guards < maxGuards)
+            {
+                int delta = guards;
+                guards = Mathf.Clamp(guards + (maxGuards / gNestSize), 0, maxGuards);
+                delta = guards - delta;
+                Debug.Log(delta);
+                for(int i = 0; i < delta; i++)
+                {
+                    Vector3 beeSpot = guardList[i].transform.position;
+                    beeSpot.z -= 0.1f;
+                    Instantiate(guard, beeSpot, Quaternion.identity);
+                }
+            }
+            sCounter++;
+            //end sCounter code.
+
+
             nextActionTime += period;
 
             //Food drain
-            int drain = (builders * buildHunger) + (guards * guardHunger);
+            int drain = (builders * buildHunger) + Mathf.CeilToInt(guards * guardHunger);
             food -= drain;
 
             //wax production
@@ -102,17 +137,18 @@ public class ResourceManager : MonoBehaviour {
 
     public void newForager()
     {
-        foragers += nestSize;
+        foragers += fNestSize;
     }
 
     public void newBuilder()
     {
-        builders += nestSize;
+        builders += bNestSize;
     }
 
-    public void newGuard()
+    public void newGuard(GameObject cell)
     {
-        guards += nestSize;
+        maxGuards += gNestSize;
+        guardList.Add(cell);
     }
 
     public void timeDilation(int multiplier)
