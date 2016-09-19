@@ -10,10 +10,14 @@ public class ResourceManager : MonoBehaviour {
     int maxFood;
     float wax;
     int maxWax;
-    public int storageSize;
+    public int foodStorage;
+    public int waxStorage;
     int fNestSize;
     int bNestSize;
     int gNestSize;
+    int nNestSize;
+
+    List<GameObject> repairList;
 
     int sCounter;
 
@@ -132,7 +136,8 @@ public class ResourceManager : MonoBehaviour {
 
     public void newStorage()
     {
-        maxFood += storageSize;
+        maxFood += foodStorage;
+        maxWax += waxStorage;
     }
 
     public void newForager()
@@ -156,5 +161,7 @@ public class ResourceManager : MonoBehaviour {
         period = 1.0f / multiplier;
         Debug.Log(period);
     }
+
+
 
 }

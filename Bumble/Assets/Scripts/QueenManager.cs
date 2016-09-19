@@ -3,12 +3,12 @@ using System.Collections;
 
 public class QueenManager : MonoBehaviour {
 
-    GameObject uLeft;   //-0.5,0.75
-    GameObject uRight;  //0.5,0.75
-    GameObject left;    //-1.0,0
-    GameObject right;   //1.0,0
-    GameObject dLeft;   //-0.5,-0.75
-    GameObject dRight;  //0.5,-0.75
+    public GameObject uLeft;   //-0.5,0.75
+    public GameObject uRight;  //0.5,0.75
+    public GameObject left;    //-1.0,0
+    public GameObject right;   //1.0,0
+    public GameObject dLeft;   //-0.5,-0.75
+    public GameObject dRight;  //0.5,-0.75
 
     public GameObject cell;
     public GameObject emptyCell;
@@ -18,12 +18,14 @@ public class QueenManager : MonoBehaviour {
     // 0 = food
     // 1 = spawn
     int cellType;
+    int cellHealth;
+    int cellMaxHP;
 
     // Use this for initialization
     void Start()
     {
         adjCheck(true);
-        cellType = -1;
+        cellHealth = cellMaxHP = 1000;
     }
 
     // Update is called once per frame
@@ -78,4 +80,14 @@ public class QueenManager : MonoBehaviour {
             return emptyCell;
         }
     }
+    public void deltaHealth(int i)
+    {
+        cellHealth += i;
+    }
+
+    public int getHealth()
+    { return cellHealth; }
+
+    public int getMaxHealth()
+    { return cellMaxHP; }
 }

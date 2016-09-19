@@ -15,24 +15,47 @@ public class CellManager : MonoBehaviour {
     public GameObject scriptManager;
 
     public GameObject[] cellTypes;
+    public int[] typeHealths;
     // 0 = food
     // 1 = spawn
     int cellType;
+    int cellHealth;
+    int cellMaxHP;
+    bool needRepair;
 
     // Use this for initialization
     void Start ()
     {
         adjCheck(true);
         cellType = -1;
+        cellHealth = cellMaxHP = 100; //health of cell frame.
+        needRepair = false;
     }
 
     // Update is called once per frame
-    void Update ()
+    void Update()
     {
-        for(int i = 0; i < cellTypes.Length; i++)
+        for (int i = 0; i < cellTypes.Length; i++)
         {
             if (i == cellType) cellTypes[i].SetActive(true);
             else cellTypes[i].SetActive(false);
+        }
+        if (needRepair)
+        {
+            if (cellHealth == cellMaxHP)
+            {
+                needRepair = false;
+            }
+        }
+        else if (cellHealth < cellMaxHP / 2)
+        {
+            needRepair = true;
+
+        }
+
+        if (scriptManager == null)
+        {
+            findScriptManager();
         }
     }
 
@@ -64,10 +87,17 @@ public class CellManager : MonoBehaviour {
         float maxRay = dir.z; dir.z = -1;
         if (Physics.Raycast(gameObject.transform.position + dir, new Vector3(0,0,1), out hit, 10.0f))
         {
-            if (hit.transform.tag == "Cell" | hit.transform.tag == "Queen")
+            GameObject adj;
+            if (hit.transform.tag == "Cell")
             {
-                GameObject adj = hit.transform.parent.gameObject;
+                adj = hit.transform.parent.gameObject;
                 if (reCheck) adj.GetComponent<CellManager>().adjCheck(false);
+                return adj;
+            }
+            else if (hit.transform.tag == "Queen")
+            {
+                adj = hit.transform.parent.gameObject;
+                if (reCheck) adj.GetComponent<QueenManager>().adjCheck(false);
                 return adj;
             }
             else
@@ -86,10 +116,43 @@ public class CellManager : MonoBehaviour {
     public void setCellType(int i)
     {
         cellType = i;
+        if(i >= 0) cellHealth = cellMaxHP = typeHealths[i];
+        scriptManager.GetComponent<PlayerInput>().cellInfoBars(gameObject);
     }
     public int getCellType()
     { return cellType; }
 
     public int numTypes()
     { return cellTypes.Length; }
+
+    public void deltaHealth(int i)
+    {
+        cellHealth += i;
+    }
+
+    public int getHealth()
+    { return cellHealth; }
+
+    public int getMaxHealth()
+    { return cellMaxHP; }
+
+    public void findScriptManager()
+    {
+        
+            GameObject tempO = new GameObject();
+            if (uLeft!= null && uLeft.tag == "Cell") tempO = uLeft;
+            else if(uRight != null && uRight.tag == "Cell") tempO = uRight;
+            else if (left != null && left.tag == "Cell") tempO = left;
+            else if (right!= null && right.tag == "Cell") tempO = right;
+            else if (dLeft != null && dLeft.tag == "Cell") tempO = dLeft;
+            else if (dRight != null )tempO = dRight;
+
+            scriptManager = tempO.GetComponent<CellManager>().getScriptManager();
+    }
+
+    public GameObject getScriptManager()
+    {
+        return scriptManager;
+    }
+
 }
