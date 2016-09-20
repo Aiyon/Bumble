@@ -85,7 +85,7 @@ public class CellManager : MonoBehaviour {
 
         RaycastHit hit;
         float maxRay = dir.z; dir.z = -1;
-        if (Physics.Raycast(gameObject.transform.position + dir, new Vector3(0,0,1), out hit, 10.0f))
+        if (Physics.Raycast(gameObject.transform.position + dir, new Vector3(0,0,1), out hit, maxRay))
         {
             GameObject adj;
             if (hit.transform.tag == "Cell")
