@@ -21,9 +21,12 @@ public class QueenManager : MonoBehaviour {
     int cellHealth;
     int cellMaxHP;
 
+    bool dead;
+
     // Use this for initialization
     void Start()
     {
+        dead = false;
         adjCheck(true);
         cellHealth = cellMaxHP = 1000;
     }
@@ -31,7 +34,12 @@ public class QueenManager : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-
+        if (dead) return;
+        if (cellHealth <= 0)
+        {
+            dead = true;
+            scriptManager.GetComponent<PlayerInput>().killCell(gameObject);
+        }
     }
 
     public void adjCheck(bool reCheck)
@@ -90,4 +98,21 @@ public class QueenManager : MonoBehaviour {
 
     public int getMaxHealth()
     { return cellMaxHP; }
+
+    public void death()
+    {
+        if (uLeft != null && uLeft.tag == "Empty")
+            DestroyImmediate(uLeft);
+        if (uRight != null && uRight.tag == "Empty")
+            DestroyImmediate(uRight);
+        if (left != null && left.tag == "Empty")
+            DestroyImmediate(left);
+        if (right != null && right.tag == "Empty")
+            DestroyImmediate(right);
+        if (dLeft != null && dLeft.tag == "Empty")
+            DestroyImmediate(dLeft);
+        if (dRight != null && dRight.tag == "Empty")
+            DestroyImmediate(dRight);
+    }
+
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerInput : MonoBehaviour {
 
@@ -75,7 +76,7 @@ public class PlayerInput : MonoBehaviour {
 
                         cellInfoBars(currentCell);
 
-                        /*if (currentCell.GetComponent<CellManager>().getCellType() >= 0)*/ cellHPText.gameObject.SetActive(true);
+                        cellHPText.gameObject.SetActive(true);
                         temp1 = currentCell.GetComponent<CellManager>().getHealth();
                         temp2 = currentCell.GetComponent<CellManager>().getMaxHealth();
                     }
@@ -213,4 +214,26 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
+    public void killCell(GameObject cell)
+    {
+        int temp = cell.transform.childCount;
+        for (int i = 0; i < temp; i++)
+        {
+            DestroyImmediate(cell.transform.GetChild(0).gameObject);
+        }
+
+        cell.layer = 2;
+        if (cell.tag == "Cell")
+        {
+            cell.GetComponent<CellManager>().death();
+            cell.GetComponent<CellManager>().adjCheck(true);
+        }
+        if (cell.tag == "Queen")
+        {
+            cell.GetComponent<QueenManager>().death();
+            cell.GetComponent<QueenManager>().adjCheck(true);
+        }
+        Destroy(cell);
+        //not replacing destroyed empties.
+    }
 }

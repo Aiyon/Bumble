@@ -9,7 +9,7 @@ public class EnemyManager : MonoBehaviour
     public int moveSpeed;
 
     bool attacking;
-    GameObject target;
+    public GameObject target;
 
 	// Use this for initialization
 	void Start ()
@@ -22,10 +22,11 @@ public class EnemyManager : MonoBehaviour
     {
         if (target == null)
         {
+            attacking = false;
             RaycastHit hit;
             if (Physics.Raycast(gameObject.transform.position, gameObject.transform.position*-1, out hit, 20.0f) && hit.transform.tag != "Empty")
             {
-                target = hit.transform.gameObject;
+                target = hit.transform.parent.gameObject;
             }
             else
             {
@@ -38,8 +39,10 @@ public class EnemyManager : MonoBehaviour
             {
                 moveTowards(target.transform.position);
             }
-            else attack(target);
-
+            else
+            {
+                attack(target);
+            }
             Vector3 dist = target.transform.position - gameObject.transform.position;
             if (dist.sqrMagnitude <= 0.5f) attacking = true;
         }
@@ -54,7 +57,6 @@ public class EnemyManager : MonoBehaviour
         newPos.x += move.x * moveSpeed*Time.deltaTime; newPos.y += move.y * moveSpeed * Time.deltaTime;
         gameObject.transform.position = newPos;
 
-        Debug.Log(move);
         //gameObject.transform.rotation = Quaternion.LookRotation(move, Vector3.left);
 
         Vector3 rot = transform.rotation.eulerAngles;
@@ -82,14 +84,15 @@ public class EnemyManager : MonoBehaviour
 
 
 
-        Debug.Log(rot.z);
-
         gameObject.transform.rotation = Quaternion.Euler(rot);
     }
 
     void attack(GameObject gamObj)
     {
-        //add cell attack code
+        if (target.tag == "Cell")
+            target.GetComponent<CellManager>().deltaHealth(damage * -1);
+        else if(target.tag == "Queen")
+            target.GetComponent<QueenManager>().deltaHealth(damage * -1);
     }
 
 }
