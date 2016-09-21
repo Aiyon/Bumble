@@ -50,4 +50,4 @@ On hover, the tooltip would display the reasons for unavailabilities, be it a da
 
 It's 4AM, and 90% of this last commit has been bugfixing, because it turned out there was an oversight in some of the very first code I wrote. But this was only caused by a set of inputs that came from cell destruction, so it seemed like the new code was working and I had to work my way from the top down to it. Turns out a single value had been changed on a raycast, and it should have been easy to catch. Clearly I didn't test it as thoroughly as I thought.
 
-Either way, it has been fixed, and I can move on to sorting out enemy spawning so the player actually has time to build guards.
+Either way, it has been fixed, and I can move on to sorting out enemy spawning so the player actually has time to build guards. But first, sleep.
