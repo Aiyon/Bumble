@@ -6,16 +6,16 @@ Given that I am using this GitHub as a repository for each of my updates, the re
 
 NOTE: I try to stray from explicitly giving exact values to variables, as the majority of the game hase yet to be balanced and they are almost guaranteed to change once the features are implemented. As such, any explicit values are placeholders.
 
-### Enemy Spawning
+### Enemy Spawning - WIP
 Enemies need to spawn offscreen, so the player doesn't see them pop into existence. Originally it seemed like the easiest way to guarantee this is to make them appear off the edge of the camera at maximum zoom, regardless of zoom. While a hive made of concentric rings would allow for a hive-size based calculation, I don't want to restrict the player's expansion of their colony unless I need to. It may turn out that making an oddly shaped hive is effective, that's half the fun of giving people the freedom to be creative.
 
 The only issue is that being able to move the camera would make it possible to push enemy spawn locations further and further away from the hive, so an alternative method would be to pick an xy co-ordinate and raycast from that point towards 0,0 until it hits something. If it hits something within a minimum distance, move it x amount further away and try again. If it would be spawning within the bounds of the camera, move it just past the edge of view. This seems inefficient however, and may need improving / replacing in the long run.
 
-### Spawn Alerts
+### Spawn Alerts - TBC
 
 Since the enemies would be appearing off the edge of what the player can see, the game needs to alert players that they have spawned. The simplest implementation would be an icon along the edge from which it is approaching. This can easily be achieved using a UI object that derives it's position from the enemy's location. A line between the enemy and the camera position would pass through the end of the screen, and that's the point at which to place the icon.
 
-### Guards, Combat, Enemy Health
+### Guards, Combat, Enemy Health - COMPLETED
 
 Guards need to be able to attack or they aren't very good at their job. They attack much like you'd expect a bee to: by stinging. There is a time delay between their attacks (1 second?) so they don't machine-gun sting things.
 
@@ -27,7 +27,7 @@ Enemies do not attack the bees directly, instead going for the hive itself. They
 
   **Note to self** - *On the subject of the queen, she needs to be implemented as a separate gameObject rather than another cell type, as her cell is unique and functions differently to any of the buildable cells.*
   
-### Cell Damage & Repair
+### Cell Damage & Repair - PARTIALLY COMPLETE (NO REPAIR)
 Cells will need to be given health, which is simple enough to implement, although it means more to balance. Yay. If a cell is partially damaged, it would need to be repaired, as dropping below 50% health disables a cell until *fully* repaired. (Guards are an exception to this rule, and won't be disabled unless destroyed as the cell represents capacity not count) The cost of repair would be in the form of wax, as a % of the original cell cost based on what % damaged the cell was, rounded to the nearest int. It's worth nothing that most cell types cost food to build, as wax is only used to build the typeless cell. However, wax has (currently) triple the value of food, so the conversion is simple enough. *e.g. a Forager nest is 8% damaged. 8% of the 250 food cost is 20 food, or 6.66 wax. So it would cost 7 wax to repair.*
   
 Since cost of repair scales off cost, cell *health* should also scale off the cost of the cell, and enemy damage should be in absolute numbers rather than percentage based to not make said scaling redundant.
@@ -38,7 +38,7 @@ Nurses are as a result technically the first optional bee type, as their role ca
 
 **example** - *If you have 5 cells, 3 builders and 2 damaged, until the repairs are complete, you are only producing 1 wax/sec. However, if you have 2 builder nests and a single nurse nest, that single nest can be repairing both damaged cells, meaning you're producing 2 wax/sec. Of course, if 0 or 1 cell was damamged, the builder setup would be either equally effective, or moreso. And this is where the balance comes from. Do you slow your production slightly to avoid it being slowed to a greater extent later on, or do you take the risk and go full production?*
 
-### Tooltips
+### Tooltips - COMPLETE - DISABLED
 
 The current bee type tooltips are placeholders, and will most likely be moved from the labels to the buttons used to create the nests for said types. The label will instead be updated to show x/y, where y is the total number of that bee type and x is the number currently fulfilling their role.
 
