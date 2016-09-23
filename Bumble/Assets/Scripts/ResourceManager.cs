@@ -41,14 +41,17 @@ public class ResourceManager : MonoBehaviour {
     public Text guardLabel;
 
     public List<GameObject> guardList;
+    List<GameObject> guardCells;
+    public List<GameObject> enemyList;
     public GameObject guard;
+    public GameObject[] enemyTypes;
 
     //update test
     float nextActionTime = 0.0f;
     float period = 1.0f;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start()
     {
         fNestSize = 1;
         bNestSize = 1;
@@ -64,12 +67,13 @@ public class ResourceManager : MonoBehaviour {
         maxFood = 500;
         maxWax = 500;
         lastUpdate = Time.time;
+        guardCells = new List<GameObject>();
 
         sCounter = 0;   //how many seconds has the game been going for.
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update()
     {
         //Update every x seconds.
         if (Time.time > nextActionTime)
@@ -83,11 +87,11 @@ public class ResourceManager : MonoBehaviour {
                 guards = Mathf.Clamp(guards + (maxGuards / gNestSize), 0, maxGuards);
                 delta = guards - delta;
                 Debug.Log(delta);
-                for(int i = 0; i < delta; i++)
+                for (int i = 0; i < delta; i++)
                 {
-                    Vector3 beeSpot = guardList[i].transform.position;
+                    Vector3 beeSpot = guardCells[i].transform.position;
                     beeSpot.z -= 0.1f;
-                    Instantiate(guard, beeSpot, Quaternion.identity);
+                    guardList.Add((GameObject)Instantiate(guard, beeSpot, Quaternion.identity));
                 }
             }
             sCounter++;
@@ -110,6 +114,30 @@ public class ResourceManager : MonoBehaviour {
 
             //If food < 0: for killing bees, take a random number between 0 and the total number of bees that use food. Then, for each type of bee, check if the number is more 
             //than the number of bees in that type. If so, take the number of that type of bee off the search number before checking the next type.
+
+
+            //ENEMY TARGETING
+            for (int i = enemyList.Count-1; i >= 0; i--)
+            {
+                Debug.Log(enemyList[i].GetComponent<EnemyManager>().getHealth());
+                if(enemyList[i].GetComponent<EnemyManager>().getHealth() <= 0)
+                {
+                    GameObject temp = enemyList[i];
+                    enemyList.RemoveAt(i);
+                    Destroy(temp);
+                }
+            }
+            for (int i = guardList.Count - 1; i >= 0; i--)
+            {
+                if(guardList[i].GetComponent<GuardController>().stinger())
+                {
+                    GameObject temp = guardList[i];
+                    guardList.RemoveAt(i);
+                    Destroy(temp);
+                    guards--;
+                }
+            }
+            getEnemy();
         }
 
         food = Mathf.Clamp(food, -500, maxFood);
@@ -153,7 +181,7 @@ public class ResourceManager : MonoBehaviour {
     public void newGuard(GameObject cell)
     {
         maxGuards += gNestSize;
-        guardList.Add(cell);
+        guardCells.Add(cell);
     }
 
     public void timeDilation(int multiplier)
@@ -162,6 +190,26 @@ public class ResourceManager : MonoBehaviour {
         Debug.Log(period);
     }
 
+    //guard brains
+    public void getEnemy()
+    {
+        int j = 0;
+        int counter = 0;
+        for (int i = 0; i < guardList.Count; i++)
+        {
+            guardList[counter].GetComponent<GuardController>().setTarget(enemyList[j]);
+            counter++;
+            if (counter > enemyList[j].GetComponent<EnemyManager>().getHealth())
+            {
+                j++;
+                if (j == enemyList.Count) i = guardList.Count;
+            }
+        }
+    }
 
+    public void newEnemy(int i)
+    {
+        enemyList.Add((GameObject)Instantiate(enemyTypes[i], Vector3.zero, Quaternion.identity));
+    }
 
 }
