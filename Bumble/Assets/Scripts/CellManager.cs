@@ -3,12 +3,12 @@ using System.Collections;
 
 public class CellManager : MonoBehaviour {
 
-    GameObject uLeft;   //-0.5,0.75
-    GameObject uRight;  //0.5,0.75
-    GameObject left;    //-1.0,0
-    GameObject right;   //1.0,0
-    GameObject dLeft;   //-0.5,-0.75
-    GameObject dRight;  //0.5,-0.75
+    public GameObject uLeft;   //-0.5,0.75
+    public GameObject uRight;  //0.5,0.75
+    public GameObject left;    //-1.0,0
+    public GameObject right;   //1.0,0
+    public GameObject dLeft;   //-0.5,-0.75
+    public GameObject dRight;  //0.5,-0.75
 
     public GameObject cell;
     public GameObject emptyCell;
@@ -22,7 +22,7 @@ public class CellManager : MonoBehaviour {
     int cellHealth;
     int cellMaxHP;
     bool needRepair;
-    bool dead;
+    bool dead = false;
 
     // Use this for initialization
     void Start ()
@@ -38,11 +38,6 @@ public class CellManager : MonoBehaviour {
     {
         if (dead) return;
 
-        for (int i = 0; i < cellTypes.Length; i++)
-        {
-            if (i == cellType) cellTypes[i].SetActive(true);
-            else cellTypes[i].SetActive(false);
-        }
         if (needRepair)
         {
             if (cellHealth == cellMaxHP)
@@ -58,7 +53,6 @@ public class CellManager : MonoBehaviour {
         else if (cellHealth < cellMaxHP / 2)
         {   
             needRepair = true;
-
         }
 
         if (scriptManager == null)
@@ -69,28 +63,27 @@ public class CellManager : MonoBehaviour {
 
     public void adjCheck(bool reCheck)
     {
-            Vector3 dir = new Vector3(-0.5f, 0.75f, 1.5f);
-            uLeft = cellCheck(dir, reCheck);
+        Vector3 dir = new Vector3(-0.5f, 0.75f, 1.5f);
+        uLeft = cellCheck(dir, reCheck);
 
-            dir = new Vector3(0.5f, 0.75f, 1.5f);
-            uRight = cellCheck(dir, reCheck);
+        dir = new Vector3(0.5f, 0.75f, 1.5f);
+        uRight = cellCheck(dir, reCheck);
 
-            dir = new Vector3(-1, 0, 1.5f);
-            left = cellCheck(dir, reCheck);
+        dir = new Vector3(-1, 0, 1.5f);
+        left = cellCheck(dir, reCheck);
 
-            dir = new Vector3(1, 0, 1.5f);
-            right = cellCheck(dir, reCheck);
+        dir = new Vector3(1, 0, 1.5f);
+        right = cellCheck(dir, reCheck);
 
-            dir = new Vector3(-0.5f, -0.75f, 1.5f);
-            dLeft = cellCheck(dir, reCheck);
+        dir = new Vector3(-0.5f, -0.75f, 1.5f);
+        dLeft = cellCheck(dir, reCheck);
 
-            dir = new Vector3(0.5f, -0.75f, 1.5f);
-            dRight = cellCheck(dir, reCheck);
+        dir = new Vector3(0.5f, -0.75f, 1.5f);
+        dRight = cellCheck(dir, reCheck);
     }
 
     public GameObject cellCheck(Vector3 dir, bool reCheck)
     {
-
         RaycastHit hit;
         float maxRay = dir.z; dir.z = -1;
         GameObject adj;
@@ -109,14 +102,20 @@ public class CellManager : MonoBehaviour {
                 if (reCheck) adj.GetComponent<QueenManager>().adjCheck(false);
                 return adj;
             }
+            else if(hit.transform.tag == "Empty")
+            {
+                return hit.transform.parent.gameObject;
+            }
             else return null;
         }
         else
         {
-            if (dead) return null;
-            Vector3 temp = gameObject.transform.position + dir; temp.z = 0;
-            adj = (GameObject)Instantiate(emptyCell, temp, Quaternion.identity);
-            return adj;
+            if (dead) return null; 
+            {
+                Vector3 temp = gameObject.transform.position + dir; temp.z = 0;
+                adj = (GameObject)Instantiate(emptyCell, temp, Quaternion.identity);
+                return adj;
+            }
         }
     }
 
@@ -125,8 +124,14 @@ public class CellManager : MonoBehaviour {
         cellType = i;
         if(i >= 0) cellHealth = cellMaxHP = typeHealths[i];
         scriptManager.GetComponent<PlayerInput>().cellInfoBars(gameObject);
-        Debug.Log("sCT TEST");
+        for (int j = 0; j < cellTypes.Length; j++)
+        {
+            if (j == cellType) cellTypes[j].SetActive(true);
+            else cellTypes[j].SetActive(false);
+
+        }
     }
+
     public int getCellType()
     { return cellType; }
 
@@ -165,6 +170,7 @@ public class CellManager : MonoBehaviour {
 
     public void death()
     {
+        //Debug.Log(uRight);
         if (uLeft != null && uLeft.tag == "Empty")
             DestroyImmediate(uLeft);
         if (uRight != null && uRight.tag == "Empty")
@@ -177,5 +183,7 @@ public class CellManager : MonoBehaviour {
             DestroyImmediate(dLeft);
         if (dRight != null && dRight.tag == "Empty")
             DestroyImmediate(dRight);
+
+        if (!dead) dead = true;
     }
 }

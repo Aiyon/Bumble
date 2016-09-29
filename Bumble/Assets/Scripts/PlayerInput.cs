@@ -193,7 +193,7 @@ public class PlayerInput : MonoBehaviour {
             cellInfoBars(currentCell);
 
             currentCell.GetComponent<CellManager>().setCellType(type);
-            Debug.Log(currentCell.GetComponent<CellManager>().getCellType());
+//            Debug.Log(currentCell.GetComponent<CellManager>().getCellType());
             int temp1 = currentCell.GetComponent<CellManager>().getHealth();
             int temp2 = currentCell.GetComponent<CellManager>().getMaxHealth();
             cellHPText.text = "Health: " + temp1 + "/" + temp2;
@@ -218,7 +218,7 @@ public class PlayerInput : MonoBehaviour {
     {
         for (int i = 0; i <= GamObj.GetComponent<CellManager>().numTypes(); i++)
         {
-            //Debug.Log(GamObj.GetComponent<CellManager>().getCellType());
+            Debug.Log(GamObj.GetComponent<CellManager>().getCellType());
 
             if (i - 1 == GamObj.GetComponent<CellManager>().getCellType()) cellMenus[i].SetActive(true);
             else cellMenus[i].SetActive(false);

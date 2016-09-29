@@ -27,7 +27,7 @@ public class QueenManager : MonoBehaviour {
     void Start()
     {
         dead = false;
-        adjCheck(true);
+        adjCheck(false);
         cellHealth = cellMaxHP = 1000;
     }
 
@@ -78,7 +78,7 @@ public class QueenManager : MonoBehaviour {
             }
             else
             {
-                return emptyCell;
+                return hit.transform.parent.gameObject;
             }
         }
         else

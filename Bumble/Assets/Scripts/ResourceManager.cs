@@ -186,7 +186,8 @@ public class ResourceManager : MonoBehaviour {
         foodLabel.text = "Food: " + (int)food + "/" + maxFood;
         foragerLabel.text = "Foragers: " + foragers;
         builderLabel.text = "Builders:  " + builders;
-        guardLabel.text = "Guards: " + guards;
+        guardLabel.text = "Guards: " + guards + "/" + maxGuards;
+        nurseLabel.text = "Nurses: " + nurses;
         waxLabel.text = "Wax:  " + (int)wax + "/" + maxWax;
     }
     //END UPDATE
