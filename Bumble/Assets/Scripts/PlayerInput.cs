@@ -83,7 +83,7 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         cellHPText.gameObject.SetActive(false);
-                        for (int i = 0; i < numTypes; i++)
+                        for (int i = 0; i <= numTypes; i++)
                         {
                             cellMenus[i].SetActive(false);
                         }
@@ -149,7 +149,7 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         gameObject.GetComponent<ResourceManager>().setFood(-100);
-                        gameObject.GetComponent<ResourceManager>().newStorage();
+                        gameObject.GetComponent<ResourceManager>().newStorage(currentCell);
                     }
                     break;
 
@@ -158,7 +158,7 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         gameObject.GetComponent<ResourceManager>().setFood(-250);
-                        gameObject.GetComponent<ResourceManager>().newForager();
+                        gameObject.GetComponent<ResourceManager>().newForager(currentCell);
                     }
                     break;
 
@@ -167,7 +167,7 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         gameObject.GetComponent<ResourceManager>().setFood(-250);
-                        gameObject.GetComponent<ResourceManager>().newBuilder();
+                        gameObject.GetComponent<ResourceManager>().newBuilder(currentCell);
                     }
                     break;
                 case 3:
@@ -178,11 +178,22 @@ public class PlayerInput : MonoBehaviour {
                         gameObject.GetComponent<ResourceManager>().newGuard(currentCell);
                     }
                     break;
+                case 4:
+                    if(gameObject.GetComponent<ResourceManager>().getFood() < 200 && gameObject.GetComponent<ResourceManager>().getWax() < 50) type = -1;
+                    else
+                    {
+                        gameObject.GetComponent<ResourceManager>().setFood(-200);
+                        gameObject.GetComponent<ResourceManager>().setWax(-50);
+                        gameObject.GetComponent<ResourceManager>().newNurse(currentCell);
+                    }
+                    break;
             }
 
+            Debug.Log("sCT TEST 2");
             cellInfoBars(currentCell);
 
             currentCell.GetComponent<CellManager>().setCellType(type);
+            Debug.Log(currentCell.GetComponent<CellManager>().getCellType());
             int temp1 = currentCell.GetComponent<CellManager>().getHealth();
             int temp2 = currentCell.GetComponent<CellManager>().getMaxHealth();
             cellHPText.text = "Health: " + temp1 + "/" + temp2;
@@ -227,12 +238,18 @@ public class PlayerInput : MonoBehaviour {
         {
             cell.GetComponent<CellManager>().death();
             cell.GetComponent<CellManager>().adjCheck(true);
+            if(cell.GetComponent<CellManager>().getCellType() >= 0)
+            {
+                gameObject.GetComponent<ResourceManager>().deadCell(cell);
+            }
         }
         if (cell.tag == "Queen")
         {
             cell.GetComponent<QueenManager>().death();
             cell.GetComponent<QueenManager>().adjCheck(true);
+            //GAME OVER
         }
+
         Destroy(cell);
         //not replacing destroyed empties.
     }

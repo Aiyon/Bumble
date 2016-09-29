@@ -109,7 +109,7 @@ public class CellManager : MonoBehaviour {
                 if (reCheck) adj.GetComponent<QueenManager>().adjCheck(false);
                 return adj;
             }
-            else return hit.transform.parent.gameObject;
+            else return null;
         }
         else
         {
@@ -125,6 +125,7 @@ public class CellManager : MonoBehaviour {
         cellType = i;
         if(i >= 0) cellHealth = cellMaxHP = typeHealths[i];
         scriptManager.GetComponent<PlayerInput>().cellInfoBars(gameObject);
+        Debug.Log("sCT TEST");
     }
     public int getCellType()
     { return cellType; }
