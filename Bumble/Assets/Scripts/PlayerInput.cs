@@ -39,7 +39,6 @@ public class PlayerInput : MonoBehaviour {
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100.0f))
             {
-                int temp1 = 0; int temp2 = 0;
 
                 if (hit.transform.tag != "Empty")
                 {
@@ -55,8 +54,6 @@ public class PlayerInput : MonoBehaviour {
                     cellHighlight.SetActive(true);
 
                     cellHPText.gameObject.SetActive(true);
-                    temp1 = currentCell.GetComponent<QueenManager>().getHealth();
-                    temp2 = currentCell.GetComponent<QueenManager>().getMaxHealth();
                 }
                 else
                 {
@@ -77,8 +74,6 @@ public class PlayerInput : MonoBehaviour {
                         cellInfoBars(currentCell);
 
                         cellHPText.gameObject.SetActive(true);
-                        temp1 = currentCell.GetComponent<CellManager>().getHealth();
-                        temp2 = currentCell.GetComponent<CellManager>().getMaxHealth();
                     }
                     else
                     {
@@ -102,8 +97,6 @@ public class PlayerInput : MonoBehaviour {
                         }
                     }
                 }
-
-                cellHPText.text = "Health: " + temp1 + "/" + temp2;
             }
             else
             {
@@ -117,6 +110,22 @@ public class PlayerInput : MonoBehaviour {
             }
 
         }
+        if (currentCell != null)
+        {
+            if (currentCell.tag == "Cell")
+            {
+                int temp1 = currentCell.GetComponent<CellManager>().getHealth();
+                int temp2 = currentCell.GetComponent<CellManager>().getMaxHealth();
+                cellHPText.text = "Health: " + temp1 + "/" + temp2;
+            }
+            else if (currentCell.tag == "Queen")
+            {
+                int temp1 = currentCell.GetComponent<QueenManager>().getHealth();
+                int temp2 = currentCell.GetComponent<QueenManager>().getMaxHealth();
+                cellHPText.text = "Health: " + temp1 + "/" + temp2;
+            }
+        }
+
         if (Input.GetMouseButtonDown(2))
         {
             lastPosition = Input.mousePosition;
@@ -127,7 +136,6 @@ public class PlayerInput : MonoBehaviour {
             float temp = panSpeed * cam.orthographicSize / 5;
             cam.transform.Translate(delta.x * temp, delta.y * temp, 0);
             lastPosition = Input.mousePosition;
-            Debug.Log(delta);
         }
 
         float scrollSpeed = Input.GetAxis("Mouse ScrollWheel");
@@ -189,7 +197,6 @@ public class PlayerInput : MonoBehaviour {
                     break;
             }
 
-            Debug.Log("sCT TEST 2");
             cellInfoBars(currentCell);
 
             currentCell.GetComponent<CellManager>().setCellType(type);
@@ -218,8 +225,6 @@ public class PlayerInput : MonoBehaviour {
     {
         for (int i = 0; i <= GamObj.GetComponent<CellManager>().numTypes(); i++)
         {
-            Debug.Log(GamObj.GetComponent<CellManager>().getCellType());
-
             if (i - 1 == GamObj.GetComponent<CellManager>().getCellType()) cellMenus[i].SetActive(true);
             else cellMenus[i].SetActive(false);
         }

@@ -8,7 +8,7 @@ public class ResourceManager : MonoBehaviour {
     //supplies
     float food;
     int maxFood;
-    float wax;
+    int wax;
     int maxWax;
     public int foodStorage;
     public int waxStorage;
@@ -22,16 +22,20 @@ public class ResourceManager : MonoBehaviour {
 
     //bees
     int foragers;
+    int maxForagers;
     int builders;
-    int maxGuards;
+    int maxBuilders;
     int guards;
+    int maxGuards;
     int nurses;
+    int maxNurses;
 
     //modifiers
     float forageSpeed;
     int buildHunger;
     float guardHunger;
     float nurseHunger;
+    int busyBuilders;
 
     float lastUpdate;
 
@@ -53,7 +57,13 @@ public class ResourceManager : MonoBehaviour {
     List<GameObject> builderCells = new List<GameObject>();
     List<GameObject> guardCells = new List<GameObject>();
     List<GameObject> nurseCells = new List<GameObject>();
-    List<GameObject> repairList = new List<GameObject>();
+
+    List<GameObject> fRepairList = new List<GameObject>();
+    List<GameObject> sRepairList = new List<GameObject>();
+    List<GameObject> bRepairList = new List<GameObject>();
+    List<GameObject> gRepairList = new List<GameObject>();
+    List<GameObject> nRepairList = new List<GameObject>();
+
     int numCells;
     bool cellsCounted = false;
 
@@ -98,20 +108,38 @@ public class ResourceManager : MonoBehaviour {
             if (!cellsCounted)
             {
                 int counter = foragerCells.Count;
-                foragers = counter * fNestSize; // - # of broken cells.
+                int broken = 0;
+                for(int i = 0; i < fRepairList.Count; i++)
+                {
+                    if (fRepairList[i].GetComponent<CellManager>().getBroken()) broken++;
+                }
+                maxForagers = counter * fNestSize;
+                foragers = maxForagers - (broken*fNestSize);
 
                 counter = storageCells.Count;
                 maxFood = (counter * foodStorage) + queenStorage;
                 maxWax = (counter * waxStorage) + queenStorage;
 
                 counter = builderCells.Count;
-                builders = counter * bNestSize;
+                broken = 0;
+                for (int i = 0; i < bRepairList.Count; i++)
+                {
+                    if (bRepairList[i].GetComponent<CellManager>().getBroken()) broken++;
+                }
+                maxBuilders = counter * bNestSize;
+                builders = maxBuilders - (broken * bNestSize) - busyBuilders;
 
                 counter = guardCells.Count;
                 maxGuards = counter * gNestSize;
 
                 counter = nurseCells.Count;
-                nurses = counter * nNestSize;
+                broken = 0;
+                for (int i = 0; i < nRepairList.Count; i++)
+                {
+                    if (nRepairList[i].GetComponent<CellManager>().getBroken()) broken++;
+                }
+                maxNurses = counter * nNestSize;
+                nurses = maxNurses - (broken * nNestSize / 2);
             }
             //END OF CELL COUNTERS
 
@@ -133,8 +161,9 @@ public class ResourceManager : MonoBehaviour {
             sCounter++;
             //end sCounter code.
 
-
             nextActionTime += period;
+
+            Debug.Log(busyBuilders);
 
             //Food drain
             int drain = (builders * buildHunger) + Mathf.CeilToInt(guards * guardHunger) + Mathf.CeilToInt(nurseCells.Count * nurseHunger);
@@ -156,39 +185,20 @@ public class ResourceManager : MonoBehaviour {
 
 
             //ENEMY TARGETING
-            if (enemyList.Count > 0)
-            {
-                for (int i = enemyList.Count - 1; i >= 0; i--)
-                {
-                    if (enemyList[i].GetComponent<EnemyManager>().getHealth() <= 0)
-                    {
-                        GameObject temp = enemyList[i];
-                        enemyList.RemoveAt(i);
-                        Destroy(temp);
-                    }
-                }
-                for (int i = guardList.Count - 1; i >= 0; i--)
-                {
-                    if (guardList[i].GetComponent<GuardController>().stinger())
-                    {
-                        GameObject temp = guardList[i];
-                        guardList.RemoveAt(i);
-                        Destroy(temp);
-                        guards--;
-                    }
-                }
-                getEnemy();
-            }
+            enemyTargeting();
+
+            //NURSE REPAIR CHECK
+            nurseCheck();
         }
 
         
 
         foodLabel.text = "Food: " + (int)food + "/" + maxFood;
         foragerLabel.text = "Foragers: " + foragers;
-        builderLabel.text = "Builders:  " + builders;
+        builderLabel.text = "Builders:  " + builders + "/" + maxBuilders;
         guardLabel.text = "Guards: " + guards + "/" + maxGuards;
         nurseLabel.text = "Nurses: " + nurses;
-        waxLabel.text = "Wax:  " + (int)wax + "/" + maxWax;
+        waxLabel.text = "Wax:  " + wax + "/" + maxWax;
     }
     //END UPDATE
 
@@ -242,6 +252,7 @@ public class ResourceManager : MonoBehaviour {
     }
     //END OF NEW CELLS
 
+    //CELL LIST CLEANUP
     public void deadCell(GameObject cell)
     {
         switch (cell.GetComponent<CellManager>().getCellType())
@@ -263,7 +274,6 @@ public class ResourceManager : MonoBehaviour {
                     if (foragerCells[i-1] == cell)
                     {
                         foragerCells.RemoveAt(i - 1);
-                        numCells--;
                         break;
                     }
                 }
@@ -305,10 +315,88 @@ public class ResourceManager : MonoBehaviour {
         cellsCounted = false;
     }
 
+    //REPAIR LIST CLEANUP
+    public void cellFixed(GameObject cell, bool remove)
+    {
+        switch (cell.GetComponent<CellManager>().getCellType())
+        {
+            case 0:
+                if (!remove)
+                { sRepairList.Add(cell); }
+                else
+                    for (int i = sRepairList.Count; i > 0; i--)
+                    {
+                        if (sRepairList[i - 1] == cell)
+                        {
+                            sRepairList.RemoveAt(i - 1);
+                            break;
+                        }
+                    }
+                break;
+            case 1:
+                if (!remove)
+                { fRepairList.Add(cell); }
+                else
+                    for (int i = fRepairList.Count; i > 0; i--)
+                    {
+                        if (fRepairList[i - 1] == cell)
+                        {
+                            Debug.Log("SNARF!");
+                            fRepairList.RemoveAt(i - 1);
+                            break;
+                        }
+                    }
+                break;
+            case 2:
+                if (!remove)
+                { bRepairList.Add(cell); }
+                else
+                    for (int i = bRepairList.Count; i > 0; i--)
+                    {
+                        if (bRepairList[i - 1] == cell)
+                        {
+                            bRepairList.RemoveAt(i - 1);
+                            break;
+                        }
+                    }
+                break;
+            case 3:
+                if (!remove)
+                { gRepairList.Add(cell); }
+                else
+                    for (int i = gRepairList.Count; i > 0; i--)
+                    {
+                        if (gRepairList[i - 1] == cell)
+                        {
+                            gRepairList.RemoveAt(i - 1);
+                            break;
+                        }
+                    }
+                break;
+            case 4:
+                if (!remove)
+                { nRepairList.Add(cell); }
+                else
+                    for (int i = nRepairList.Count; i > 0; i--)
+                    {
+                        if (nRepairList[i - 1] == cell)
+                        {
+                            nRepairList.RemoveAt(i - 1);
+                            break;
+                        }
+                    }
+                break;
+        }
+        cellsCounted = false;
+    }
+
     public void timeDilation(int multiplier)
     {
         period = 1.0f / multiplier;
-        Debug.Log(period);
+        foreach(GameObject enemy in enemyList)
+        {
+            enemy.GetComponent<EnemyManager>().setDilation(period);       
+        }
     }
 
     //guard brains
@@ -332,6 +420,95 @@ public class ResourceManager : MonoBehaviour {
     {
 
         enemyList.Add((GameObject)Instantiate(enemyTypes[i], Vector3.zero, Quaternion.identity));
+    }
+
+    //ENEMY TARGETING
+    public void enemyTargeting()
+    {
+        if (enemyList.Count > 0)
+        {
+            for (int i = enemyList.Count - 1; i >= 0; i--)
+            {
+                if (enemyList[i].GetComponent<EnemyManager>().getHealth() <= 0)
+                {
+                    GameObject temp = enemyList[i];
+                    enemyList.RemoveAt(i);
+                    Destroy(temp);
+                }
+            }
+            for (int i = guardList.Count - 1; i >= 0; i--)
+            {
+                if (guardList[i].GetComponent<GuardController>().stinger())
+                {
+                    GameObject temp = guardList[i];
+                    guardList.RemoveAt(i);
+                    Destroy(temp);
+                    guards--;
+                }
+            }
+            getEnemy();
+        }
+    }
+
+    public void nurseCheck()
+    {
+        int i = 0;
+        int repairers = builders + nurses;
+        bool norb = false; //false == nurses avaiable, true = builders used;
+        busyBuilders = 0;
+
+        foreach (GameObject gObj in fRepairList)
+        {
+            if (!norb && i >= nurses) norb = true;
+            if (norb && i >= repairers) break;
+            fixCell(gObj, norb);
+            i++;
+        }
+        foreach (GameObject gObj in sRepairList)
+        {
+            if (!norb && i >= nurses) norb = true;
+            if (norb && i >= repairers) break;
+            fixCell(gObj, norb);
+            i++;
+        }
+        foreach (GameObject gObj in bRepairList)
+        {
+            if (!norb && i >= nurses) norb = true;
+            if (norb && i >= repairers) break;
+            fixCell(gObj, norb);
+            i++;
+        }
+        foreach (GameObject gObj in gRepairList)
+        {
+            if (!norb && i >= nurses) norb = true;
+            if (norb && i >= repairers) break;
+            fixCell(gObj, norb);
+            i++;
+        }
+        foreach (GameObject gObj in nRepairList)
+        {
+            if (!norb && i >= nurses) norb = true;
+            if (norb && i >= repairers) break;
+            fixCell(gObj, norb);
+            i++;
+        }
+    }
+
+    void fixCell(GameObject cell, bool nOrB)
+    {
+        float MHP = cell.GetComponent<CellManager>().getMaxHealth();
+
+        if (cell.GetComponent<CellManager>().getHealth() >= MHP) return;
+
+        int repair = Mathf.CeilToInt(MHP / 100);
+
+        if (repair > wax) return;
+        else
+        {
+            wax -= repair;
+            cell.GetComponent<CellManager>().deltaHealth(repair);
+            if(nOrB) busyBuilders++;
+        }
     }
 
 }

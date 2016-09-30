@@ -23,6 +23,7 @@ public class CellManager : MonoBehaviour {
     int cellMaxHP;
     bool needRepair;
     bool dead = false;
+    bool damaged = false;
 
     // Use this for initialization
     void Start ()
@@ -43,16 +44,23 @@ public class CellManager : MonoBehaviour {
             if (cellHealth == cellMaxHP)
             {
                 needRepair = false;
+                scriptManager.GetComponent<ResourceManager>().cellFixed(gameObject, true);
             }
-            else if(cellHealth <= 0)
+            else if (cellHealth <= 0)
             {
                 dead = true;
                 scriptManager.GetComponent<PlayerInput>().killCell(gameObject);
+                scriptManager.GetComponent<ResourceManager>().cellFixed(gameObject, true);
             }
         }
         else if (cellHealth < cellMaxHP / 2)
-        {   
+        {
             needRepair = true;
+        }
+        else if (!damaged && cellHealth < cellMaxHP)
+        {
+            scriptManager.GetComponent<ResourceManager>().cellFixed(gameObject, false);
+            damaged = true;
         }
 
         if (scriptManager == null)
@@ -140,7 +148,7 @@ public class CellManager : MonoBehaviour {
 
     public void deltaHealth(int i)
     {
-        cellHealth += i;
+        cellHealth = Mathf.Clamp(cellHealth + i, -1, cellMaxHP);
     }
 
     public int getHealth()
@@ -185,5 +193,12 @@ public class CellManager : MonoBehaviour {
             DestroyImmediate(dRight);
 
         if (!dead) dead = true;
+    }
+
+    public bool getBroken()
+    {
+        float hpP = cellHealth; hpP /= cellMaxHP;
+        Debug.Log(hpP);
+        return (hpP < 0.5f);
     }
 }

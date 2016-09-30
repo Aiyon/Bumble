@@ -12,11 +12,16 @@ public class EnemyManager : MonoBehaviour
     bool dead;
     public GameObject target;
 
-	// Use this for initialization
-	void Start ()
+    //update test
+    float nextActionTime = 0.0f;
+    float period = 1.0f;
+
+    // Use this for initialization
+    void Start ()
     {
         attacking = false;
         dead = false;
+        nextActionTime = Time.time;
     }
 
     // Update is called once per frame
@@ -49,13 +54,20 @@ public class EnemyManager : MonoBehaviour
                 }
                 else
                 {
-                    attack(target);
+                    if (Time.time > nextActionTime)
+                    {
+                        attack(target);
+                        nextActionTime += period;
+                    }
                 }
                 Vector3 dist = target.transform.position - gameObject.transform.position;
                 if (dist.sqrMagnitude <= 0.5f) attacking = true;
             }
         }
-
+        if (Time.time > nextActionTime)
+        {
+            nextActionTime += period;
+        }
     }
 
     void moveTowards(Vector3 dir)
@@ -63,7 +75,9 @@ public class EnemyManager : MonoBehaviour
         Vector3 newPos = gameObject.transform.position;
         Vector3 move = dir - gameObject.transform.position; move.Normalize();
 
-        newPos.x += move.x * moveSpeed*Time.deltaTime; newPos.y += move.y * moveSpeed * Time.deltaTime;
+        float dist = moveSpeed / period;
+
+        newPos.x += move.x * dist*Time.deltaTime; newPos.y += move.y * dist * Time.deltaTime;
         gameObject.transform.position = newPos;
 
         //set z rotation
@@ -104,4 +118,9 @@ public class EnemyManager : MonoBehaviour
 
     public void setHealth(int i)
     { health += i; }
+
+    public void setDilation(float amount)
+    {
+        period = amount;
+    }
 }
