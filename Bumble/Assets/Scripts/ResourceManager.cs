@@ -30,6 +30,13 @@ public class ResourceManager : MonoBehaviour {
     int nurses;
     int maxNurses;
 
+    //Hive size variables
+    public float left;
+    public float right;
+    public float top;
+    public float bottom;
+    Vector2 centre;
+
     //modifiers
     float forageSpeed;
     int buildHunger;
@@ -50,6 +57,8 @@ public class ResourceManager : MonoBehaviour {
     public List<GameObject> enemyList;
     public GameObject guard;
     public GameObject[] enemyTypes;
+    public int eSpawnInterval;
+    int eSCounter;
 
     //Cell Lists
     List<GameObject> foragerCells = new List<GameObject>();
@@ -64,7 +73,7 @@ public class ResourceManager : MonoBehaviour {
     List<GameObject> gRepairList = new List<GameObject>();
     List<GameObject> nRepairList = new List<GameObject>();
 
-    int numCells;
+    public int numCells;
     bool cellsCounted = false;
 
     //update test
@@ -92,6 +101,7 @@ public class ResourceManager : MonoBehaviour {
         lastUpdate = Time.time;
         guardCells = new List<GameObject>();
         numCells = 7;
+        eSCounter = 0;
 
         sCounter = 0;   //how many seconds has the game been going for.
     }
@@ -109,12 +119,12 @@ public class ResourceManager : MonoBehaviour {
             {
                 int counter = foragerCells.Count;
                 int broken = 0;
-                for(int i = 0; i < fRepairList.Count; i++)
+                for (int i = 0; i < fRepairList.Count; i++)
                 {
                     if (fRepairList[i].GetComponent<CellManager>().getBroken()) broken++;
                 }
                 maxForagers = counter * fNestSize;
-                foragers = maxForagers - (broken*fNestSize);
+                foragers = maxForagers - (broken * fNestSize);
 
                 counter = storageCells.Count;
                 maxFood = (counter * foodStorage) + queenStorage;
@@ -156,14 +166,13 @@ public class ResourceManager : MonoBehaviour {
                     Vector3 beeSpot = guardCells[i].transform.position;
                     beeSpot.z -= 0.1f;
                     guardList.Add((GameObject)Instantiate(guard, beeSpot, Quaternion.identity));
+                    guardList[guardList.Count - 1].GetComponent<GuardController>().setSM(gameObject);
                 }
             }
             sCounter++;
             //end sCounter code.
 
             nextActionTime += period;
-
-            Debug.Log(busyBuilders);
 
             //Food drain
             int drain = (builders * buildHunger) + Mathf.CeilToInt(guards * guardHunger) + Mathf.CeilToInt(nurseCells.Count * nurseHunger);
@@ -183,6 +192,18 @@ public class ResourceManager : MonoBehaviour {
             //If food < 0: for killing bees, take a random number between 0 and the total number of bees that use food. Then, for each type of bee, check if the number is more 
             //than the number of bees in that type. If so, take the number of that type of bee off the search number before checking the next type.
 
+            eSCounter++;
+            //ENEMY SPAWNING
+            int jeff = (numCells-1) / 7;
+            Debug.Log(numCells);
+            if (eSCounter >= 5 && jeff >= 1)
+            {
+                eSCounter = 0;
+                for (int i = 0; i < jeff; i++)
+                {
+                    newEnemy(numCells);
+                }
+            }
 
             //ENEMY TARGETING
             enemyTargeting();
@@ -191,7 +212,7 @@ public class ResourceManager : MonoBehaviour {
             nurseCheck();
         }
 
-        
+
 
         foodLabel.text = "Food: " + (int)food + "/" + maxFood;
         foragerLabel.text = "Foragers: " + foragers;
@@ -218,7 +239,6 @@ public class ResourceManager : MonoBehaviour {
     public void newStorage(GameObject cell)
     {
         storageCells.Add(cell);
-        numCells++;
         //maxFood += foodStorage;
         //maxWax += waxStorage;
     }
@@ -226,29 +246,30 @@ public class ResourceManager : MonoBehaviour {
     public void newForager(GameObject cell)
     {
         foragerCells.Add(cell);
-        numCells++;
         cellsCounted = false;
     }
 
     public void newBuilder(GameObject cell)
     {
         builderCells.Add(cell);
-        numCells++;
         cellsCounted = false;
     }
 
     public void newGuard(GameObject cell)
     {
         guardCells.Add(cell);
-        numCells++;
         cellsCounted = false;
     }
 
     public void newNurse(GameObject cell)
     {
         nurseCells.Add(cell);
-        numCells++;
         cellsCounted = false;
+    }
+
+    public void newEmpty()
+    {
+        numCells++;
     }
     //END OF NEW CELLS
 
@@ -258,11 +279,11 @@ public class ResourceManager : MonoBehaviour {
         switch (cell.GetComponent<CellManager>().getCellType())
         {
             case 0:
-                for(int i = storageCells.Count; i > 0; i--)
+                for (int i = storageCells.Count; i > 0; i--)
                 {
-                    if (storageCells[i-1] == cell)
+                    if (storageCells[i - 1] == cell)
                     {
-                        storageCells.RemoveAt(i-1);
+                        storageCells.RemoveAt(i - 1);
                         numCells--;
                         break;
                     }
@@ -271,7 +292,7 @@ public class ResourceManager : MonoBehaviour {
             case 1:
                 for (int i = foragerCells.Count; i > 0; i--)
                 {
-                    if (foragerCells[i-1] == cell)
+                    if (foragerCells[i - 1] == cell)
                     {
                         foragerCells.RemoveAt(i - 1);
                         break;
@@ -393,9 +414,13 @@ public class ResourceManager : MonoBehaviour {
     public void timeDilation(int multiplier)
     {
         period = 1.0f / multiplier;
-        foreach(GameObject enemy in enemyList)
+        foreach (GameObject enemy in enemyList)
         {
-            enemy.GetComponent<EnemyManager>().setDilation(period);       
+            enemy.GetComponent<EnemyManager>().setDilation(period);
+        }
+        foreach (GameObject bumble in guardList)
+        {
+            bumble.GetComponent<GuardController>().setDilation(period);
         }
     }
 
@@ -416,10 +441,29 @@ public class ResourceManager : MonoBehaviour {
         }
     }
 
-    public void newEnemy(int i)
+    //ENEMY SPAWNING
+    public void newEnemy(int strength)
     {
+        int temp = Random.Range(0, 2);
+        Vector3 spawnPos = new Vector3(centre.x, bottom, 0);
 
-        enemyList.Add((GameObject)Instantiate(enemyTypes[i], Vector3.zero, Quaternion.identity));
+        float width = Mathf.Abs(right - left);
+
+        if (width < 10) width = 12;
+        if (temp == 0)
+        {
+            spawnPos.x += width / 1.5f;
+        }
+        else spawnPos.x -= width / 1.5f;
+
+        //ADD ENEMY TYPE SELECTION, AND Y POS EXCEPTION FOR GROUND-BOUND ENEMIES
+        float height = Mathf.Abs(top - bottom);
+        spawnPos.y = bottom + Random.Range(height / 4, height * 2.0f);
+
+        GameObject newE = (GameObject)Instantiate(enemyTypes[0], spawnPos, Quaternion.identity);
+        newE.GetComponent<EnemyManager>().setDilation(period);
+        enemyList.Add(newE);
+        
     }
 
     //ENEMY TARGETING
@@ -507,8 +551,26 @@ public class ResourceManager : MonoBehaviour {
         {
             wax -= repair;
             cell.GetComponent<CellManager>().deltaHealth(repair);
-            if(nOrB) busyBuilders++;
+            if (nOrB) busyBuilders++;
         }
     }
+
+    public void setHiveSize(float l, float r, float t, float b)
+    {
+        left = l; right = r; top = t; bottom = b;
+        centre.x = (left + right) / 2; centre.y = (top + bottom) / 2;
+    }
+
+    public float getLeft()
+    { return left; }
+
+    public float getRight()
+    { return right; }
+
+    public float getTop()
+    { return top; }
+
+    public float getBot()
+    { return bottom; }
 
 }

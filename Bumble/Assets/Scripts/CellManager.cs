@@ -3,18 +3,19 @@ using System.Collections;
 
 public class CellManager : MonoBehaviour {
 
-    public GameObject uLeft;   //-0.5,0.75
-    public GameObject uRight;  //0.5,0.75
-    public GameObject left;    //-1.0,0
-    public GameObject right;   //1.0,0
-    public GameObject dLeft;   //-0.5,-0.75
-    public GameObject dRight;  //0.5,-0.75
+    GameObject uLeft;   //-0.5,0.75
+    GameObject uRight;  //0.5,0.75
+    GameObject left;    //-1.0,0
+    GameObject right;   //1.0,0
+    GameObject dLeft;   //-0.5,-0.75
+    GameObject dRight;  //0.5,-0.75
 
     public GameObject cell;
     public GameObject emptyCell;
     public GameObject scriptManager;
 
     public GameObject[] cellTypes;
+    public GameObject[] typeIcons;
     public int[] typeHealths;
     // 0 = food
     // 1 = spawn
@@ -32,6 +33,23 @@ public class CellManager : MonoBehaviour {
         cellType = -1;
         cellHealth = cellMaxHP = 100; //health of cell frame.
         needRepair = false;
+
+        if (scriptManager == null) findScriptManager();
+
+        //update hive size.
+        float l = scriptManager.GetComponent<ResourceManager>().getLeft();
+        float r = scriptManager.GetComponent<ResourceManager>().getRight();
+        float t = scriptManager.GetComponent<ResourceManager>().getTop();
+        float b = scriptManager.GetComponent<ResourceManager>().getBot();
+
+        Vector3 temp = gameObject.transform.position;
+        if (temp.x < l) l = temp.x - 0.5f;
+        if (temp.x > r) r = temp.x + 0.5f;
+        if (temp.y > t) t = temp.y + 0.375f;
+        if (temp.y < b) b = temp.y - 0.375f;
+        scriptManager.GetComponent<ResourceManager>().setHiveSize(l, r, t, b);
+        //end of size update.
+
     }
 
     // Update is called once per frame
@@ -39,11 +57,21 @@ public class CellManager : MonoBehaviour {
     {
         if (dead) return;
 
+        //SHOW CELL DAMAGE (Temporary?)
+        if(cellHealth < cellMaxHP)
+        {
+            Color temp = cellTypes[cellType].GetComponent<SpriteRenderer>().color;
+            temp.a = (float)cellHealth / cellMaxHP;
+
+            cellTypes[cellType].GetComponent<SpriteRenderer>().color = temp;
+        }
+
         if (needRepair)
         {
             if (cellHealth == cellMaxHP)
             {
                 needRepair = false;
+                typeIcons[cellType].SetActive(true);
                 scriptManager.GetComponent<ResourceManager>().cellFixed(gameObject, true);
             }
             else if (cellHealth <= 0)
@@ -53,19 +81,15 @@ public class CellManager : MonoBehaviour {
                 scriptManager.GetComponent<ResourceManager>().cellFixed(gameObject, true);
             }
         }
-        else if (cellHealth < cellMaxHP / 2)
+        else if (cellHealth < (cellMaxHP / 2))
         {
             needRepair = true;
+            typeIcons[cellType].SetActive(false);
         }
         else if (!damaged && cellHealth < cellMaxHP)
         {
             scriptManager.GetComponent<ResourceManager>().cellFixed(gameObject, false);
             damaged = true;
-        }
-
-        if (scriptManager == null)
-        {
-            findScriptManager();
         }
     }
 
@@ -134,8 +158,16 @@ public class CellManager : MonoBehaviour {
         scriptManager.GetComponent<PlayerInput>().cellInfoBars(gameObject);
         for (int j = 0; j < cellTypes.Length; j++)
         {
-            if (j == cellType) cellTypes[j].SetActive(true);
-            else cellTypes[j].SetActive(false);
+            if (j == cellType)
+            {
+                cellTypes[j].SetActive(true);
+                typeIcons[j].SetActive(true);
+            }
+            else
+            {
+                cellTypes[j].SetActive(false);
+                typeIcons[j].SetActive(false);
+            }
 
         }
     }
@@ -198,7 +230,6 @@ public class CellManager : MonoBehaviour {
     public bool getBroken()
     {
         float hpP = cellHealth; hpP /= cellMaxHP;
-        Debug.Log(hpP);
         return (hpP < 0.5f);
     }
 }

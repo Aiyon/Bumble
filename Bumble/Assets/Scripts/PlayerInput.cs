@@ -218,6 +218,8 @@ public class PlayerInput : MonoBehaviour {
             currentCell = (GameObject)Instantiate(cell, newPos, Quaternion.identity);
             emptyMenu.SetActive(false);
             cellMenus[0].SetActive(true);
+
+            gameObject.GetComponent<ResourceManager>().newEmpty();
         }
     }
 
