@@ -66,9 +66,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\BeeBrain.cs" />
+    <Compile Include="Assets\Scripts\BuilderBrain.cs" />
     <Compile Include="Assets\Scripts\CellManager.cs" />
     <Compile Include="Assets\Scripts\EnemyManager.cs" />
+    <Compile Include="Assets\Scripts\ForagerBrain.cs" />
     <Compile Include="Assets\Scripts\GuardController.cs" />
+    <Compile Include="Assets\Scripts\NurseBrain.cs" />
     <Compile Include="Assets\Scripts\PlayerInput.cs" />
     <Compile Include="Assets\Scripts\QueenManager.cs" />
     <Compile Include="Assets\Scripts\ResourceManager.cs" />

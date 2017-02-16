@@ -30,6 +30,14 @@ public class ResourceManager : MonoBehaviour {
     int nurses;
     int maxNurses;
 
+    //bee actors.
+    public GameObject o_forager;
+    List<GameObject> o_foragers = new List<GameObject>();
+    public GameObject o_builder;
+    List<GameObject> o_builders = new List<GameObject>();
+    public GameObject o_nurse;
+    List<GameObject> o_nurses = new List<GameObject>();
+
     //Hive size variables
     public float left;
     public float right;
@@ -61,6 +69,8 @@ public class ResourceManager : MonoBehaviour {
     int eSCounter;
 
     //Cell Lists
+    public GameObject queen;
+
     List<GameObject> foragerCells = new List<GameObject>();
     List<GameObject> storageCells = new List<GameObject>();
     List<GameObject> builderCells = new List<GameObject>();
@@ -113,6 +123,33 @@ public class ResourceManager : MonoBehaviour {
         //Update every x seconds.
         if (Time.time > nextActionTime)
         {
+            if (o_foragers.Count < foragers)
+                for (int i = 0; i < foragerCells.Count; i++)
+                {
+                    int pos = (i + o_foragers.Count) % foragerCells.Count;
+                    o_foragers.Add((GameObject)Instantiate(o_forager, foragerCells[pos].transform.position, Quaternion.identity));
+                    o_foragers[o_foragers.Count - 1].GetComponent<ForagerBrain>().setSM(gameObject);
+                    o_foragers[o_foragers.Count - 1].GetComponent<ForagerBrain>().setHome(foragerCells[pos]);
+                    if (o_foragers.Count >= foragers) break;
+                }
+            if (o_builders.Count < builders)
+                for (int i = 0; i < builderCells.Count; i++)
+                {
+                    int pos = (i + o_builders.Count) % builderCells.Count;
+                    o_builders.Add((GameObject)Instantiate(o_builder, builderCells[pos].transform.position, Quaternion.identity));
+                    o_builders[o_builders.Count - 1].GetComponent<BuilderBrain>().setSM(gameObject);
+                    o_builders[o_builders.Count - 1].GetComponent<BuilderBrain>().setHome(builderCells[pos]);
+                    if (o_builders.Count >= builders) break;
+                }
+            if (o_nurses.Count < nurses)
+                for (int i = 0; i < nurseCells.Count; i++)
+                {
+                    int pos = (i + o_nurses.Count) % nurseCells.Count;
+                    o_nurses.Add((GameObject)Instantiate(o_nurse, nurseCells[pos].transform.position, Quaternion.identity));
+                    o_nurses[o_nurses.Count - 1].GetComponent<NurseBrain>().setSM(gameObject);
+                    o_nurses[o_nurses.Count - 1].GetComponent<NurseBrain>().setHome(nurseCells[pos]);
+                    if (o_nurses.Count >= nurses) break;
+                }
 
             //CELL COUNTERS:
             if (!cellsCounted)
@@ -160,12 +197,13 @@ public class ResourceManager : MonoBehaviour {
                 int delta = guards;
                 guards = Mathf.Clamp(guards + (maxGuards / gNestSize), 0, maxGuards);
                 delta = guards - delta;
-                Debug.Log(delta);
                 for (int i = 0; i < delta; i++)
                 {
                     Vector3 beeSpot = guardCells[i].transform.position;
                     beeSpot.z -= 0.1f;
-                    guardList.Add((GameObject)Instantiate(guard, beeSpot, Quaternion.identity));
+                    GameObject newG = (GameObject)Instantiate(guard, beeSpot, Quaternion.identity);
+                    guardList.Add(newG);
+                    newG.GetComponent<GuardController>().setDilation(period);
                     guardList[guardList.Count - 1].GetComponent<GuardController>().setSM(gameObject);
                 }
             }
@@ -195,7 +233,6 @@ public class ResourceManager : MonoBehaviour {
             eSCounter++;
             //ENEMY SPAWNING
             int jeff = (numCells-1) / 7;
-            Debug.Log(numCells);
             if (eSCounter >= 5 && jeff >= 1)
             {
                 eSCounter = 0;
@@ -572,5 +609,26 @@ public class ResourceManager : MonoBehaviour {
 
     public float getBot()
     { return bottom; }
+
+    public List<GameObject> getCellList(int i)  //0 = storage, 1 = forage, 2 = build, 3 = guard, 4 = nurse.
+    {
+        switch(i)
+        {
+            case 0:
+                return storageCells;
+            case 1:
+                return foragerCells;
+            case 2:
+                return builderCells;
+            case 3:
+                return guardCells;
+            case 4:
+                return nurseCells;
+        }
+        return null;
+    }
+
+    public GameObject getQueen()
+    { return queen; }
 
 }

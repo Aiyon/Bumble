@@ -25,14 +25,17 @@ public class GuardController : MonoBehaviour {
             {
                 nextActionTime += (period*0.75f);
                 //attack enemy.
-                target.GetComponent<EnemyManager>().setHealth(-1);
-
-                //does stinging kill the guard?
-                if (target.tag == "Large") noStinger = true;
-                else if (target.tag == "Small")
+                if (target != null)
                 {
-                    if (Random.Range(0, 3) == 0)
-                        noStinger = true;
+                    target.GetComponent<EnemyManager>().setHealth(-1);
+
+                    //does stinging kill the guard?
+                    if (target.tag == "Large") noStinger = true;
+                    else if (target.tag == "Small")
+                    {
+                        if (Random.Range(0, 3) == 0)
+                            noStinger = true;
+                    }
                 }
 
                 attacking = false;
@@ -66,6 +69,7 @@ public class GuardController : MonoBehaviour {
         }
     }
 
+
     void moveTowards(Vector3 dir)
     {
         Vector3 newPos = gameObject.transform.position;
@@ -78,7 +82,6 @@ public class GuardController : MonoBehaviour {
         Vector3 rot = sprite.transform.rotation.eulerAngles;
 
         rot.z = Mathf.Atan(move.y / move.x); rot.z *= 180 / Mathf.PI;
-        Debug.Log(rot.z);
         if (move.y == 0)
         {
             if (move.y > 0) rot.z = 180;
@@ -93,6 +96,7 @@ public class GuardController : MonoBehaviour {
         rot.z += 90;
         sprite.transform.rotation = Quaternion.Euler(rot);
     }
+
 
     public void setTarget(GameObject gObj)
     {

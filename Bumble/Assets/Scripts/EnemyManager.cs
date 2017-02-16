@@ -123,7 +123,6 @@ public class EnemyManager : MonoBehaviour
         Vector3 rot = enemySprite.transform.rotation.eulerAngles;
 
         rot.z = Mathf.Atan(move.y / move.x); rot.z *= 180 / Mathf.PI;
-        Debug.Log(rot.z);
         if (move.y == 0)
         {
             if (move.y > 0) rot.z = 180;

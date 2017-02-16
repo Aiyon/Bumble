@@ -3,12 +3,12 @@ using System.Collections;
 
 public class CellManager : MonoBehaviour {
 
-    GameObject uLeft;   //-0.5,0.75
-    GameObject uRight;  //0.5,0.75
-    GameObject left;    //-1.0,0
-    GameObject right;   //1.0,0
-    GameObject dLeft;   //-0.5,-0.75
-    GameObject dRight;  //0.5,-0.75
+    public GameObject uLeft;   //-0.5,0.75
+    public GameObject uRight;  //0.5,0.75
+    public GameObject left;    //-1.0,0
+    public GameObject right;   //1.0,0
+    public GameObject dLeft;   //-0.5,-0.75
+    public GameObject dRight;  //0.5,-0.75
 
     public GameObject cell;
     public GameObject emptyCell;
@@ -29,26 +29,18 @@ public class CellManager : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
+
+        Debug.Log("test");
         adjCheck(true);
         cellType = -1;
         cellHealth = cellMaxHP = 100; //health of cell frame.
         needRepair = false;
 
+        Debug.Log(scriptManager);
         if (scriptManager == null) findScriptManager();
-
-        //update hive size.
-        float l = scriptManager.GetComponent<ResourceManager>().getLeft();
-        float r = scriptManager.GetComponent<ResourceManager>().getRight();
-        float t = scriptManager.GetComponent<ResourceManager>().getTop();
-        float b = scriptManager.GetComponent<ResourceManager>().getBot();
-
-        Vector3 temp = gameObject.transform.position;
-        if (temp.x < l) l = temp.x - 0.5f;
-        if (temp.x > r) r = temp.x + 0.5f;
-        if (temp.y > t) t = temp.y + 0.375f;
-        if (temp.y < b) b = temp.y - 0.375f;
-        scriptManager.GetComponent<ResourceManager>().setHiveSize(l, r, t, b);
-        //end of size update.
+        Debug.Log(scriptManager);
+        
+        setHiveSize();
 
     }
 
@@ -56,6 +48,8 @@ public class CellManager : MonoBehaviour {
     void Update()
     {
         if (dead) return;
+
+
 
         //SHOW CELL DAMAGE (Temporary?)
         if(cellHealth < cellMaxHP)
@@ -102,7 +96,9 @@ public class CellManager : MonoBehaviour {
         uRight = cellCheck(dir, reCheck);
 
         dir = new Vector3(-1, 0, 1.5f);
+        Debug.Log(left);
         left = cellCheck(dir, reCheck);
+        Debug.Log(left);
 
         dir = new Vector3(1, 0, 1.5f);
         right = cellCheck(dir, reCheck);
@@ -122,6 +118,7 @@ public class CellManager : MonoBehaviour {
 
         if (Physics.Raycast(gameObject.transform.position + dir, new Vector3(0, 0, 1), out hit, maxRay))
         {
+            Debug.Log(hit.transform.parent.gameObject);
             if (hit.transform.tag == "Cell")
             {
                 adj = hit.transform.parent.gameObject;
@@ -148,6 +145,7 @@ public class CellManager : MonoBehaviour {
                 adj = (GameObject)Instantiate(emptyCell, temp, Quaternion.identity);
                 return adj;
             }
+
         }
     }
 
@@ -191,16 +189,20 @@ public class CellManager : MonoBehaviour {
 
     public void findScriptManager()
     {
-        
-            GameObject tempO = new GameObject();
-            if (uLeft!= null && uLeft.tag == "Cell") tempO = uLeft;
-            else if(uRight != null && uRight.tag == "Cell") tempO = uRight;
-            else if (left != null && left.tag == "Cell") tempO = left;
-            else if (right!= null && right.tag == "Cell") tempO = right;
-            else if (dLeft != null && dLeft.tag == "Cell") tempO = dLeft;
-            else if (dRight != null )tempO = dRight;
+        GameObject tempO = new GameObject();
+        if (uLeft != null && uLeft.tag == "Cell" && uLeft.GetComponent<CellManager>().getCellType() >= 0)
+            tempO = uLeft;
+        else if (uRight != null && uRight.tag == "Cell" && uRight.GetComponent<CellManager>().getCellType() >= 0)
+            tempO = uRight;
+        else if (right != null && right.tag == "Cell" && right.GetComponent<CellManager>().getCellType() >= 0)
+            tempO = right;
+        else if (dRight != null && dRight.tag == "Cell" && dRight.GetComponent<CellManager>().getCellType() >= 0)
+            tempO = dRight;
+        else if (dLeft != null && dLeft.tag == "Cell" && dLeft.GetComponent<CellManager>().getCellType() >= 0) tempO = dLeft;
+        else if (left != null) tempO = left;
 
-            scriptManager = tempO.GetComponent<CellManager>().getScriptManager();
+        Debug.Log(tempO);
+        scriptManager = tempO.GetComponent<CellManager>().getScriptManager();
     }
 
     public GameObject getScriptManager()
@@ -231,5 +233,22 @@ public class CellManager : MonoBehaviour {
     {
         float hpP = cellHealth; hpP /= cellMaxHP;
         return (hpP < 0.5f);
+    }
+
+    void setHiveSize()
+    {
+        //update hive size.
+        float l = scriptManager.GetComponent<ResourceManager>().getLeft();
+        float r = scriptManager.GetComponent<ResourceManager>().getRight();
+        float t = scriptManager.GetComponent<ResourceManager>().getTop();
+        float b = scriptManager.GetComponent<ResourceManager>().getBot();
+
+        Vector3 temp = gameObject.transform.position;
+        if (temp.x < l) l = temp.x - 0.5f;
+        if (temp.x > r) r = temp.x + 0.5f;
+        if (temp.y > t) t = temp.y + 0.375f;
+        if (temp.y < b) b = temp.y - 0.375f;
+        scriptManager.GetComponent<ResourceManager>().setHiveSize(l, r, t, b);
+        //end of size update.
     }
 }

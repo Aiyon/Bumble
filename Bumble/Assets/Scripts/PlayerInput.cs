@@ -215,6 +215,7 @@ public class PlayerInput : MonoBehaviour {
             gameObject.GetComponent<ResourceManager>().setWax(-200);
             Vector3 newPos = currentCell.transform.position;
             Destroy(currentCell);
+            newPos.z = 0;
             currentCell = (GameObject)Instantiate(cell, newPos, Quaternion.identity);
             emptyMenu.SetActive(false);
             cellMenus[0].SetActive(true);
